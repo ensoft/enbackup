@@ -1,0 +1,36 @@
+Examples
+--------
+The 'examples' directory /usr/share/doc/enbackup/examples contains a
+number of optional scripts and sample configuration files which can be
+installed on a server, depending on what level of functionality is
+required:
+
+ * Core functionality:
+   1) Place the required .rc files (see enbackup_aged.rc and
+      enbackup_unaged.rc) in /etc/enbackup.d/
+      The following files are installed by default, and may also
+      be cusomtized as required:
+       * enbackup.rc
+       * enbackup-mirror.rc
+       * enbackup-archive.rc
+   2) Copy enbackup.cron to /etc/cron.d and point it at the .rc files
+      from 1)
+
+ * Back up package lists:
+   1) Copy enbackup-installed-packages.cron to /etc/cron.daily/
+   2) Uncomment the required command.
+
+ * Back up LDAP:
+   1) Copy enbackup-ldap-dump.cron to /etc/cron.daily/
+   2) Uncomment the command
+
+ * Back up SQL databases:
+   1) Copy enbackup-mysql-dump.cron to /etc/cron.daily/
+   2) Uncomment the command and set the password.
+
+ * External backups:
+   1) Create a udev rule to run enbackup-archive when the required
+      device is inserted -- see enbackup.rules for details.
+   2) Place the file in /etc/udev/rules.d/
+   3) Set the email address to send results to in
+      /etc/enbackup.d/enbackup-archive.rc.

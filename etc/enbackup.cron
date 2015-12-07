@@ -1,0 +1,14 @@
+MAILTO=backup-watchers@localhost
+
+# ------------- minute (0 - 59)
+# | ----------- hour (0 - 23)
+# | | --------- day of month (1 - 31)
+# | | | ------- month (1 - 12)
+# | | | | ----- day of week (0 - 6) (Sunday=0)
+# | | | | |
+# * * * * * user  command to be executed
+
+# Every day at 4am run the daily unaged backups
+#0 4 * * *  root  /usr/bin/enbackup.py /etc/enbackup_unaged.rc > /tmp/enbackup-noise-unaged.log 2>&1
+# Every day at 5am run the daily aged backups
+#0 5 * * *  root  /usr/bin/enbackup.py /etc/enbackup_aged.rc > /tmp/enbackup-noise-aged.log 2>&1

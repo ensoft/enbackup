@@ -1,0 +1,14 @@
+#
+# Configuration for Enbackup tools
+#
+
+#
+# System-wide configuration
+#
+# username: specify the user account to use for running backups.  This is
+# the user that will have ownership of the backup repository.
+# You should ensure a user account with the specified name exists on each
+# machine you want to run enbackup on.
+#
+[Global]
+username: enbackup

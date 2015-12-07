@@ -1,0 +1,36 @@
+#
+# Configuration for external (e.g. USB) disk backups.
+#
+
+#
+# log_email: the email address to which notifications will be sent
+#
+[Logging]
+log_email: root@localhost
+
+#
+# mount_point:
+#   Set the path that you'd like to mount the externl disk at.
+#   If the directory does not exist, it will be created.
+#   This is an absolute path
+#
+# src_dir:
+#   Set the path that you'd like the archive to be taken from.  If this is
+#   a directory then the whole directory will be copied recursively.
+#   This is an absolute path
+#
+# tgt_dir:
+#   Set the path on the disk that you'd like the archive to be written to.
+#   This is relative to the mount point.
+#
+[Paths]
+#mount_point: /media/usbdisk/
+#src_dir: /backup/
+#tgt_dir: backups/
+
+#
+# start_at: optionally specify a time to start archiving at, in 24-hour
+#           HH:MM format.
+#
+[Options]
+#start_at: 16:00

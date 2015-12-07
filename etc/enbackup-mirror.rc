@@ -1,0 +1,64 @@
+###############################################################################
+# enbackup-mirror.rc - Config file controlling enbackup mirroring operations
+#
+# September 2012, Jim M
+#
+# Copyright (c) 2012 by Ensoft Ltd.
+# All right reserved
+###############################################################################
+
+
+[Paths]
+#
+# src_dir_restrict: use this to specify a directory that is allowed to
+#   be used as source in a mirroring operation (that is, mirrored from
+#   this server to another server).  The specified directory, and any
+#   subdirectories, will be accessable.  For example:
+#    * /         - whole filesystem can be mirrored
+#    * /enbackup - anything under /enbackup can be mirrored
+#    * None      - nothing can be mirrored.
+#
+# tgt_dir_restrict: use this to specify a directory that can be
+#   used as the target of a mirroing operation (that is, have data
+#   mirrored from another server written to it).  Mirroring operations
+#   originating on this server will be able to write to anywhere under
+#   the specified directory.  For example:
+#    * /         - data can be written anywhere
+#    * /enbackup - data can be written anywhere under /enbackup.
+#    * None      - no data can be written
+#
+src_dir_restrict: /enbackup
+tgt_dir_restrict: /enbackup
+
+
+[Logging]
+#
+# Specify the email address to send notification emails to.  Default
+# is root@localhost.  Set this to blank to disable emails.
+#
+#log_email: somebody@domain.com
+
+
+#
+# Specify named sections defining sources to mirror from below.
+# The section names names correspond to the source-keywords passed to
+# a mirror command, to define where data should be read from.
+#
+# For example, given the configuration:
+#
+# [example-source]
+# src_server: my-server.domain.com
+# src_dir:   /my/directory/to/mirror
+#
+# the following command
+#
+#   enbackup mirror --source example-source --destination /enbackup/my/copy/
+#
+# will copy /my/directory/to/mirror/* from my-server.domain.com to
+# /enbackup/my/copy/mirror/* on the originating server.
+#
+# Note that the presence or absence of a trailing '/' on the src_dir is
+# significant: 'foo/' will only copy the *contents* of foo directly into
+# the target directory, while 'foo' will copy the directory itself and
+# all contents beneath it.
+#

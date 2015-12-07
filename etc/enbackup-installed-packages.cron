@@ -1,0 +1,9 @@
+#!/bin/sh
+
+#
+# List all the installed packages so that the list can be backed up.
+# Uncomment out the correct line below depending on the package
+# management system in use.
+#
+#dpkg --get-selections > /etc/installed-packages.log
+#yum list installed > /etc/installed-packages.log

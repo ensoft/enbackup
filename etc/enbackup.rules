@@ -1,0 +1,19 @@
+#
+# Handle insertion of the external disks used for backups
+#
+# We specify serial number, so only the physical devices listed
+# will be handled - no need for worker script to validate the device
+#
+# Note: get the parameters needed from one of the two commands below
+#
+# 1. Old command: udevinfo -a -p /sys/block/sdc
+#    Look for this ideally: ATTRS{serial}=="57442D5743414E4B34343036333637"
+#
+# 2. New command: udevadm info -q all -n /dev/sdb1
+#    Look for this ideally: ID_SERIAL_SHORT=57442D5743414E4B34343036333637
+#
+
+#
+# Example Disk 1
+#
+#BUS=="usb", SYSFS{serial}=="2GHKJXTJ", KERNEL=="sd?1", RUN+="/usr/bin/enbackup-archive.py"

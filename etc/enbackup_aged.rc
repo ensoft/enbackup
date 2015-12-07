@@ -1,0 +1,62 @@
+###############################################################################
+# enbackup_aged.rc - Config file specifying how to run enbackup.py
+#                    for aged backups.
+#
+# December 2007, Anthony Toole
+#
+# Copyright (c) 2007-2012 by Ensoft Ltd.
+# All right reserved
+###############################################################################
+
+#
+# Each line is in the form "item: value".  
+#
+# To specify multiple values of item just have multiple lines - this does not
+# apply to the threshold_* or rdiff_version items where only a single value can
+# be specified.
+#
+
+#
+# Single directory to backup. Should be absolute reference to directory.
+#
+src_dir_single: /var/log/
+
+#
+# Target server - ie. server housing the tgt_dir directory.  If ommitted, then
+# the files are assumed to be local.
+#
+tgt_server: myserver.somewhere.co.uk
+
+#
+# Directory in which to store the backups, and reference file to use.
+# Replace "<server>" with the server name and uncomment out the tgt_dir line.
+#
+#tgt_dir: /enbackup/<server>/aged/
+reference_file_name: enbackup-reference-aged.stats
+
+#
+# Specify any exclusions - eg. specify "tgt-linux" to exclude any tgt-linux 
+# sub-directories.  This should not contain "/" - it specifies only a single 
+# element in the path heirarchy.
+#
+exclude_directory:
+
+#
+# Specify who the backup log should be sent to
+#
+#log_email_to: backup-watchers@somewhere.co.uk
+
+#
+# Specify the expected version of rdiff-backup installed on this machine.  This
+# is simply used to spot when the version changes, to highlight whether the 
+# release notes need checking for problems!
+#
+rdiff_version: rdiff-backup 1.2.8
+
+#
+# Threshold values above which changes are reported in the log.  This is really
+# just to supress unnecessary noise.
+#
+threshold_seconds: 300
+threshold_mbytes: 200
+threshold_percentage: 10

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+#
+# Un-comment out the lines below and add the MySQL enbackup user password.
+#
+#mysqldump --events --user=enbackup --password=<pw> --all-databases > /var/enbackup/all-database-dump.sql
+#chmod 640 /var/enbackup/all-database-dump.sql

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+#
+# Output the contents of the entire LDAP directory into a file.
+# This file is then backed up, and can be used to re-populate the
+# LDAP directory using slapadd.
+#
+#slapcat -l /var/enbackup/ldap-dump.ldif

@@ -1,0 +1,125 @@
+enbackup (1.4.13) precise; urgency=low
+
+  * Several minor fixes/improvements to make enbackup-archive more generic:
+    - Add configuration options for mount direcory, source directory,
+      and target directory.
+    - Add handling to create mount points and target directories if they
+      don't already exist.
+    - Replace use of disk model numbers in enbackup-archive.py and
+      enbackup-sata-remove.sh with device numbers (e.g. /dev/sdb1)
+      to
+      * avoid hardcoding model numbers
+      * use the same format as is used for USB disks
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Fri, 29 Nov 2013 15:54:06 +0000
+
+enbackup (1.4.12) precise; urgency=low
+
+  * Add '--events' keyword to sample enbackup-mysql-dump.cron script,
+    to force dumping of the mysql.event table (not dumped by default).
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Tue, 28 May 2013 15:35:29 +0100
+
+enbackup (1.4.11) precise; urgency=low
+
+  * Add absolute path for udevadm executable in archive, so it can be
+    found regardless of the environment when the script is spawned.
+  * Add an option to read archive start time from config file
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Tue, 19 Feb 2013 14:57:31 +0000
+
+enbackup (1.4.10) precise; urgency=low
+
+  * Fix typo in mapping file format string, that breaks local backups
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Tue, 19 Feb 2013 14:51:12 +0000
+
+enbackup (1.4.9) precise; urgency=low
+
+  * Updates to archive script:
+    - Migrate to lockfile-based locking
+    - Use enbackup Logger support for debug/error messages
+    - Use 'udevadm info' for more robust detection of USB vs. eSATA
+    - Add handling to suspend USB, as well as eSATA, devices, before
+      unplugging them.
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Fri, 11 Jan 2013 18:12:12 +0000
+
+enbackup (1.4.8) lucid; urgency=low
+
+  * Add dependency on 'python-support' package to ensure symlinks are
+    set up during install.
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Tue, 30 Oct 2012 16:34:46 +0000
+
+enbackup (1.4.7) lucid; urgency=low
+
+  * Remove unwanted sata.py module (inadvertently added in 1.4.6)
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Tue, 30 Oct 2012 11:43:52 +0000
+
+enbackup (1.4.6) lucid; urgency=low
+
+  * Remove dependency on scsiadd package: enbackup-sata-remove
+    now removes scsi devices manually.
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Mon, 29 Oct 2012 16:41:36 +0000
+
+enbackup (1.4.5) lucid; urgency=low
+
+  * Add locking of 'aged' and 'unaged' directories to archive script
+  * Rationalise handling of special files:
+    - symlinks are backed up (as links) by both rdiff-backup and rsync
+    - other special files are skipped
+  * Add filtering to rsync output to ignore skipped files.
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Tue, 16 Oct 2012 19:16:58 +0100
+
+enbackup (1.4.4) lucid; urgency=low
+
+  * Fix a typo in the rsync command
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Fri, 28 Sep 2012 12:54:12 +0100
+
+enbackup (1.4.3) lucid; urgency=low
+
+  * Fix uninitialized use of variable 'perform_backup' in error cases.
+  * Reduce verbosity of rsync logging for mirror operations
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Fri, 28 Sep 2012 10:48:39 +0100
+
+enbackup (1.4.2) lucid; urgency=low
+
+  * Fix Logger to ensure log files are created as owned by the 'enbackup' user.
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Thu, 27 Sep 2012 20:34:20 +0100
+
+enbackup (1.4.1) lucid; urgency=low
+
+  * Add 'su' before starting a remote 'notify', to get the correct SSH keys picked up.
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Thu, 27 Sep 2012 19:46:29 +0100
+
+enbackup (1.4) lucid; urgency=low
+
+  * Add remote mirroring support.
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Thu, 27 Sep 2012 16:19:33 +0100
+
+enbackup (1.3) lucid; urgency=low
+
+  * Add missing depenendency on scsiadd, lsscsi packages.
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Fri, 07 September 2012 14:40:00 +0000
+
+enbackup (1.2) lucid; urgency=low
+
+  * Update enbackup.py to automatically create destination directories.
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Wed, 15 August 2012 17:27:00 +0000
+
+enbackup (1.1) lucid; urgency=low
+
+  * Initial version
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Fri, 29 June 2012 12:49:33 +0000

@@ -1,0 +1,19 @@
+#!/usr/bin/python
+###############################################################################
+# enbackup - Top-level enbackup script
+#
+# September 2012, Jim Mizutani
+#
+# Copyright (c) 2012 by Ensoft Ltd. All right reserved
+#
+# Version 1.0 - Initial functionality
+###############################################################################
+#
+# Overview: this is the top-level enbackup script.
+#
+# It performs no real work itself, it just invokes one of the requested
+# subcommands.
+#
+
+from enbackup.ui import main
+main()

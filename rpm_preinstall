@@ -1,0 +1,4 @@
+# Add 'enbackup' user and group
+getent group enbackup > /dev/null 2>&1 || groupadd -r enbackup
+getent passwd enbackup > /dev/null 2>&1 || useradd -r -g -m enbackup -s /bin/sh enbackup
+exit 0
