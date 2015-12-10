@@ -287,7 +287,7 @@ def run_cmd(cmd, logger):
         raise
 
 
-def run_cmd_output(cmd, logger, cmd_stdin=None):
+def run_cmd_output(cmd, logger=None, cmd_stdin=None):
     """
     Run a command, logging a debug message before starting, and
     again if an error is returned.  Errors are returned to the caller.
@@ -295,19 +295,17 @@ def run_cmd_output(cmd, logger, cmd_stdin=None):
     cmd:    the command to run, in the form of a list where the first
             element is the executable name, and the subsequent elements
             are the arguments.
-    logger: enbackup logger to use for debug
+    logger: Optional enbackup logger to use for debug
     cmd_stdin: optionally specify a file descriptor for the process to use
             as standard input.
 
     Returns a tuple containing (returncode, stdout, stderr)
     """
-
-    #
     # It would be simpler to just use subprocess.check_output() here, but
     # unfortunately that won't exist until Python 2.7...
-    #
+    if logger:
+        logger.log("Running command: {0}".format(cmd))
 
-    logger.log("Running command: {0}".format(cmd))
     p = subprocess.Popen(cmd,
                          stdin=cmd_stdin,
                          stdout=subprocess.PIPE,

@@ -27,7 +27,7 @@ import enbackup.log
 # be rejected.  Note these match the module names; the import
 # code below relies on this.
 #
-valid_subcommands = [ "backup", "mirror", "remote", "notify" ]
+valid_subcommands = [ "backup", "mirror", "remote", "notify", "status" ]
 
 
 #
