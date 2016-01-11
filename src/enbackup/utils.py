@@ -260,6 +260,37 @@ class StringFilter(object):
 ###############################################################################
 
 
+class DefaultConfigParser(ConfigParser.ConfigParser):
+    """
+    Extends ConfigParser to add support for default options under sections.
+
+    For some reason ConfigParser only seems to provide support for defaults
+    at the top-level.
+    """
+    def __init__(self, defaults):
+        """
+        :param defaults:
+            A two-level dictionary.  The outer level is indexed by section
+            name, and the inner level is indexed by option name within the
+            section.
+        """
+        self.defaults = defaults
+        ConfigParser.ConfigParser.__init__(self)
+
+    def get(self, section, option):
+        # Try fetching the value using the superclass method, but if we
+        # get a NoSectionError or NoOptionError, try to return one of
+        # the default values.  (If the value isn't in the defaults, re-raise
+        # the exception.)
+        try:
+            return ConfigParser.ConfigParser.get(self, section, option)
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError) as e:
+            if section in self.defaults and option in self.defaults[section]:
+                return self.defaults[section][option]
+            else:
+                raise
+
+
 def get_username():
     return enbackup_user
         
@@ -324,7 +355,7 @@ def run_cmd_output(cmd, logger=None, cmd_stdin=None):
 # Read the global config file to find out the username to use for all
 # processing, and verify that the user exists:
 #
-config = ConfigParser.ConfigParser({ "username": "enbackup" })
+config = DefaultConfigParser({ "Global": { "username": "enbackup" }})
 config.read(cfg_file_path)
 enbackup_user = config.get("Global", "username")
 

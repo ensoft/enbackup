@@ -74,9 +74,8 @@ import datetime
 import subprocess
 import traceback
 import shutil
-import ConfigParser
 from enbackup.utils import DirLock, GlobalLock
-from enbackup.utils import makedirs
+import enbackup.utils
 import enbackup.log
 
 #
@@ -220,10 +219,11 @@ def release_backup_locks():
     global server_lock
     unlock_count = 0
 
-    for lock in dir_locks:
-        if lock.locked:
-            lock.unlock()
-            unlock_count = unlock_count + 1
+    if dir_locks:
+        for lock in dir_locks:
+            if lock.locked:
+                lock.unlock()
+                unlock_count = unlock_count + 1
 
     debug("Released {0} directory locks".format(unlock_count))
 
@@ -687,7 +687,7 @@ def main():
     # Next check that no other disk is already mounted, and mount this
     # disk if not
     #
-    makedirs(mount_dir, logger, False)
+    enbackup.utils.makedirs(mount_dir, logger, False)
 
     if os.path.ismount(mount_dir):
         error("Unexpected - disk is already mounted.  "
@@ -729,8 +729,8 @@ def main():
     backup_dir_full = os.path.join(mount_dir, target_dir)
     mirror_dir_full = os.path.join(backup_dir_full, mirror_dir)
 
-    makedirs(backup_dir_full, logger, False)
-    makedirs(mirror_dir_full, logger, False)
+    enbackup.utils.makedirs(backup_dir_full, logger, False)
+    enbackup.utils.makedirs(mirror_dir_full, logger, False)
 
     to_move = os.listdir(backup_dir_full)
     for backup in to_move:
@@ -879,26 +879,21 @@ if __name__ == "__main__":
     # Read the configuration from the file (or fall back to defaults if the
     # file does not exist, or the option isn't specified).
     #
-    config = ConfigParser.ConfigParser(
-                { "log_email": logfile_email_to_default,
-                  "src_dir": source_dir_default,
-                  "tgt_dir": target_dir_default,
-                  "mount_point": mount_dir_default, })
+    config = enbackup.utils.DefaultConfigParser(
+                { "Logging" :
+                    { "log_email": logfile_email_to_default },
+                  "Paths" :
+                    { "src_dir": source_dir_default,
+                      "tgt_dir": target_dir_default,
+                      "mount_point": mount_dir_default, },
+                  "Options" :
+                    { "start_at": start_at_default }})
     config.read(os.path.join(config_dir, "enbackup-archive.rc"))
     logfile_email_to = config.get("Logging", "log_email")
     source_dir = config.get("Paths", "src_dir")
     target_dir = config.get("Paths", "tgt_dir")
     mount_dir  = config.get("Paths", "mount_point")
-
-    try:
-        start_at_string = config.get("Options", "start_at")
-    except ConfigParser.NoSectionError, ConfigParser.NoOptionError:
-        #
-        # Fall back to using the default start time.  Can't debug yet
-        # because we don't initialize debug until after we've read options
-        # and forked.
-        #
-        start_at_string = start_at_default
+    start_at_string = config.get("Options", "start_at")
 
     try:
         start_at_ts = datetime.datetime.strptime(start_at_string,

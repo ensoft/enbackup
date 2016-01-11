@@ -1,3 +1,15 @@
+enbackup (1.4.14) UNRELEASED; urgency=medium
+
+  * Add 'enbackup status' command.
+  * Replace uses of ConfigParser with a new DefaultConfigParser
+    subclass that supports specifying per-section defaults (fixes
+    a bug whereby the old method of specifying defaults didn't
+    actually work, so missing sections would trigger a NoSectionError).
+  * Add try/except around mirror command handlers, so that exceptions
+    get logged instead of failing silently.
+
+ -- Jim Mizutani <jmizutan@ensoft-linux3.cisco.com>  Thu, 07 Jan 2016 09:37:48 +0000
+
 enbackup (1.4.13) precise; urgency=low
 
   * Several minor fixes/improvements to make enbackup-archive more generic:
