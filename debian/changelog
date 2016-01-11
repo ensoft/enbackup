@@ -8,7 +8,7 @@ enbackup (1.4.14) UNRELEASED; urgency=medium
   * Add try/except around mirror command handlers, so that exceptions
     get logged instead of failing silently.
 
- -- Jim Mizutani <jmizutan@ensoft-linux3.cisco.com>  Thu, 07 Jan 2016 09:37:48 +0000
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Thu, 07 Jan 2016 09:37:48 +0000
 
 enbackup (1.4.13) precise; urgency=low
 
