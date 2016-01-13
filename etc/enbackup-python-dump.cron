@@ -1,0 +1,11 @@
+#!/bin/sh
+
+#
+# Place this script in e.g. /etc/cron.daily/ to back up the list of
+# python packages installed via PIP.
+#
+# The packages can then be reinstalled using
+#   pip install -r /etc/enbackup-python-pip-requirements.txt
+#
+pip freeze > /etc/enbackup-python-pip-requirements.txt
+

@@ -6,7 +6,7 @@
 from distutils.core import setup
 
 setup(name='enbackup',
-      version="1.4.14",
+      version="1.4.15",
       description='EnBackup: backup tools based on rdiff-backup',
       packages=['enbackup', 'enbackup.cmd'],
       package_dir={'': 'src'},
@@ -26,6 +26,7 @@ setup(name='enbackup',
                    ['etc/enbackup.rules',
                     'etc/enbackup-mysql-dump.cron',
                     'etc/enbackup-ldap-dump.cron',
+                    'etc/enbackup-python-dump.cron',
                     'etc/enbackup.cron',
                     'etc/enbackup-installed-packages.cron',
                     'etc/enbackup_unaged.rc',
