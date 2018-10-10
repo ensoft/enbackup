@@ -6,12 +6,13 @@
 from distutils.core import setup
 
 setup(name='enbackup',
-      version="1.4.15",
+      version="1.4.16",
       description='EnBackup: backup tools based on rdiff-backup',
       packages=['enbackup', 'enbackup.cmd'],
       package_dir={'': 'src'},
       scripts=['bin/enbackup',
                'bin/enbackup-archive.py',
+               'bin/enbackup-archive.sh',
                'bin/enbackup-rdiff-to-mirror.py',
                'bin/enbackup-sata-poll.py',
                'bin/enbackup-sata-insert.sh',

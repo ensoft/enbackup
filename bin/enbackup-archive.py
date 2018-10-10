@@ -77,6 +77,7 @@ import shutil
 from enbackup.utils import DirLock, GlobalLock
 import enbackup.utils
 import enbackup.log
+import argparse
 
 #
 # Directory where backup scripts are located.
@@ -642,7 +643,7 @@ def device_is_usb(devname):
     return is_usb
 
 
-def main():
+def main(device):
     #
     # This script can hammer our servers at a time when people notice.
     # Be nice. By default this process runs at a negative nice value,
@@ -654,13 +655,16 @@ def main():
     # First we need to know the device that has been inserted - this is
     # passed in env variable
     #
-    if not os.environ.has_key("DEVPATH"):
-        debug(" argv: %s" % (sys.argv))
-        debug(" environ:")
-        for item in os.environ:
-            debug(" %s: %s" % (item, os.environ[item]))
-        error("No 'DEVPATH' item - cannot mount harddisk")
-    dev = os.environ["DEVPATH"]
+    if device is None:
+        if not os.environ.has_key("DEVPATH"):
+            debug(" argv: %s" % (sys.argv))
+            debug(" environ:")
+            for item in os.environ:
+                debug(" %s: %s" % (item, os.environ[item]))
+            error("No 'DEVPATH' item - cannot mount harddisk")
+        dev = os.environ["DEVPATH"]
+    else:
+        dev = device
     dev = dev.split("/")[-1]
     debug("Got device %s" % (dev))
 
@@ -875,6 +879,11 @@ if __name__ == "__main__":
               "(EUID %s)" % (os.geteuid()))
         sys.exit(-1)
 
+    parser = argparse.ArgumentParser(description="Run an external backup")
+    parser.add_argument("--device", action="store",
+                        help="Specify the external device to back up to.")
+    args = parser.parse_args(sys.argv[1:])
+
     #
     # Read the configuration from the file (or fall back to defaults if the
     # file does not exist, or the option isn't specified).
@@ -928,7 +937,7 @@ if __name__ == "__main__":
             #
             sleep_until_between_times(start_at, [23,59])
 
-            main()
+            main(args.device)
         except:
             #
             # Want to catch exceptions and print outputs, but not cause it to
