@@ -6,7 +6,7 @@
 from distutils.core import setup
 
 setup(name='enbackup',
-      version="1.4.16",
+      version="1.4.18",
       description='EnBackup: backup tools based on rdiff-backup',
       packages=['enbackup', 'enbackup.cmd'],
       package_dir={'': 'src'},

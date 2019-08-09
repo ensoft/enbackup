@@ -1,4 +1,22 @@
-enbackup (1.4.16ubuntu1) UNRELEASED; urgency=medium
+enbackup (1.4.18) bionic; urgency=medium
+
+  * NFS mount and tar file support for enbackup-archive.py
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Fri, 09 Aug 2019 15:11:54 +0100
+
+enbackup (1.4.17ubuntu3) UNRELEASED; urgency=medium
+
+  * Remove python-support dependency, since the package doesn't exist on Ubuntu bionic.
+
+ -- Jim Mizutani <jim.mizutan@ensoft.co.uk>  Fri, 26 Oct 2018 13:58:05 +0000
+
+enbackup (1.4.17ubuntu2) bionic; urgency=medium
+
+  * Add enbackup-trim-old-data.py to allow aging out of historical data
+
+ -- Jim Mizutani <jim.mizutani@ensoft.co.uk>  Thu, 11 Oct 2018 15:00:50 +0100
+
+enbackup (1.4.16ubuntu1) trusty; urgency=medium
 
   * Add enbackup-archive.sh wrapper to allow long-running udev jobs.
   * Add pip3 unfreeze to python-dump recovery documentation.

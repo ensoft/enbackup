@@ -69,6 +69,7 @@
 import os
 import sys
 import re
+import pwd
 import time
 import datetime
 import subprocess
@@ -592,31 +593,64 @@ def calculate_directory_size(dir):
         size = 0
 
     return rc, size
-    
 
-def check_sufficient_free_space(dir, size_needed):
+
+def get_free_space_from_df(dir):
     rc, err, out = run_cmd(["df", "-m", "-P", dir])
     if rc != 0:
         error("ERROR: failed to determine available free space: %s\n%s\n" %
               (rc, err))
     free_space = int(out.split("\n")[1].split()[3])
+
+    return free_space
+
+
+def check_sufficient_free_space(dir, size_needed, is_nfs):
+    free_space_known = False
+
+    while not free_space_known:
+        free_space = get_free_space_from_df(dir)
+        if is_nfs:
+            # On nfs, df sometimes updates slowly in the background
+            # after deleting a file.  In case that's happening, wait
+            # a few seconds, check df again, and if the reported value
+            # is different repeat until it's stable.
+            time.sleep(10)
+            new_free_space = get_free_space_from_df(dir)
+            if new_free_space == free_space:
+                free_space_known = True
+            else:
+                debug("Free space on NFS dropped from {}MB to {}MB "
+                      "while waiting, trying again".format(free_space,
+                                                           new_free_space))
+        else:
+            free_space_known = True
+
     debug("Free space available on disk: %u Mb (%u Mb needed)" %
           (free_space, size_needed))
     return (free_space >= size_needed)
 
 
-def remove_directory(dir):
+def remove_old_backup(old_backup):
     #
     # Removes a directory by spawning multiple copies of 'rm'.
+    # Arg can be either a directory or a tar file.
     #
-    dir = normalise_directory(dir)
-    debug("Removing directory '%s'" % dir)
-    path_regexp = "%s*/*/*/*" % dir
-    find_cmd = ["find", dir, "-maxdepth", "4", "-type", "d",
-                "-path", path_regexp, "-print0"]
-    rm_cmd = "xargs -0P2 -n1 rm -rf".split()
-    rc, stdout = pipe(find_cmd, rm_cmd)
-    shutil.rmtree(dir)
+    rc = 0
+
+    if old_backup.endswith(".tar"):
+        debug("Removing tar file '%s'" % old_backup)
+        os.remove(old_backup)
+    else:
+        dir = normalise_directory(old_backup)
+        debug("Removing directory '%s'" % dir)
+        path_regexp = "%s*/*/*/*" % dir
+        find_cmd = ["find", dir, "-maxdepth", "4", "-type", "d",
+                    "-path", path_regexp, "-print0"]
+        rm_cmd = "xargs -0P2 -n1 rm -rf".split()
+        rc, stdout = pipe(find_cmd, rm_cmd)
+        shutil.rmtree(dir)
+
     return rc
 
 
@@ -643,7 +677,7 @@ def device_is_usb(devname):
     return is_usb
 
 
-def main(device):
+def main(device, is_nfs, is_tar):
     #
     # This script can hammer our servers at a time when people notice.
     # Be nice. By default this process runs at a negative nice value,
@@ -665,7 +699,10 @@ def main(device):
         dev = os.environ["DEVPATH"]
     else:
         dev = device
-    dev = dev.split("/")[-1]
+
+    if not is_nfs:
+        dev = dev.split("/")[-1]
+
     debug("Got device %s" % (dev))
 
     #
@@ -673,13 +710,16 @@ def main(device):
     # I can't easily do that - so for now infer that were aren't eSATA if we
     # are USB :)
     #
-    is_usb = device_is_usb(dev)
-    if not is_usb:
-        debug("Device is eSATA")
-        esata_disk = True
+    if not is_nfs:
+        is_usb = device_is_usb(dev)
+        if not is_usb:
+            debug("Device is eSATA")
+            esata_disk = True
+        else:
+            debug("Device is USB")
+            esata_disk = False
     else:
-        debug("Device is USB")
-        esata_disk = False
+        debug("Device is NFS")
 
     #
     # Need some locking here - ideally working with main backup script locking
@@ -696,12 +736,25 @@ def main(device):
     if os.path.ismount(mount_dir):
         error("Unexpected - disk is already mounted.  "
               "Give up to avoid clashing")
-    rc, err, out = run_cmd(["/bin/mount",
-                            "-text3",
-                            "/dev/%s" % dev,
-                            mount_dir])
+
+    if is_nfs:
+        mount_args = [dev, mount_dir]
+    else:
+        mount_args = ["-text3", "/dev/%s" % dev, mount_dir]
+
+    rc, err, out = run_cmd(["/bin/mount"] + mount_args)
     if rc != 0:
-        error("ERROR: failed to mount device %s: %d\n%s\n" % (dev, rc, err))
+        error("ERROR: failed to mount device %s (%s): %d\n%s\n" % (dev,
+                                                                   mount_args,
+                                                                   rc,
+                                                                   err))
+
+    # Drop down to the enbackup user's uid/gid, while writing files.
+    new_user = enbackup.utils.get_username()
+    new_uid = pwd.getpwnam(new_user).pw_uid
+    new_gid = pwd.getpwnam(new_user).pw_gid
+    os.setegid(new_gid)
+    os.seteuid(new_uid)
 
     #
     # Need to know the size of the backup directory
@@ -738,10 +791,24 @@ def main(device):
 
     to_move = os.listdir(backup_dir_full)
     for backup in to_move:
-        if is_iso_date(backup):
+        backup_date = backup
+        old_backup_is_tar = False
+        # Check whether the old backup is a tar file, since that affects how
+        # we remove files.
+        if backup_date.endswith(".tar"):
+            backup_date = backup_date[:-4]
+            old_backup_is_tar = True
+
+        if is_iso_date(backup_date):
             backup_old = os.path.join(backup_dir_full, backup)
             backup_new = os.path.join(mirror_dir_full, backup)
-            rc, err, out = run_cmd([rdiff_to_mirror_cmd, backup_old])
+            if old_backup_is_tar:
+                rc, err, out = run_cmd(["tar", "-f", backup_old,
+                                        "--delete", "--wildcards",
+                                        "*/rdiff-backup-data"])
+            else:
+                rc, err, out = run_cmd([rdiff_to_mirror_cmd, backup_old])
+
             if rc != 0:
                 error("ERROR: failed to shrink old backup %s: %d\n%s\n" %
                       (backup_old, rc, err))
@@ -764,7 +831,7 @@ def main(device):
     for directory in res["delete"]:
         full_directory = os.path.join(mirror_dir_full, directory)
         debug("Deleting old backup directory: %s" % (full_directory))
-        rc = remove_directory(full_directory)
+        rc = remove_old_backup(full_directory)
         if rc != 0:
             error("ERROR: failed to delete %s as part of the old backups" %
                   full_directory)
@@ -776,7 +843,7 @@ def main(device):
     # then delete the older "keep" sets, as long as we keep a minimum of
     # three.
     #
-    if check_sufficient_free_space(backup_dir_full, backup_size):
+    if check_sufficient_free_space(backup_dir_full, backup_size, is_nfs):
         debug("Got enough free space without deleting quarterlies")
     elif len(res["keep"]) < minimum_backup_sets_required:
         error("Insufficient disk space, and not enough 'keep' directories to "
@@ -797,11 +864,11 @@ def main(device):
             full_directory = os.path.join(mirror_dir_full, directory)
             debug("Deleting old backup directory (%s): %s" %
                   (dir_type, full_directory))
-            rc = remove_directory(full_directory)
+            rc = remove_old_backup(full_directory)
             if rc != 0:
                 error("ERROR: failed to delete %s as part of the old backups" %
                       full_directory)
-            if check_sufficient_free_space(backup_dir_full, backup_size):
+            if check_sufficient_free_space(backup_dir_full, backup_size, is_nfs):
                 debug("Deleting backup sets has created enough free space")
                 break
 
@@ -818,10 +885,13 @@ def main(device):
     debug("Copying current backup mirror/increment %s to %s" %
           (source_dir, output_dir))
     start_time = time.time()
-    rc, err, out = run_cmd(["cp", "-a", source_dir, output_dir])
+    #rc, err, out = run_cmd(["cp", "-a", source_dir, output_dir])
+    # @@@ Tar test, to preserve ACLs and also speed up copy to NFS
+    output_tar = output_dir + ".tar"
+    rc, err, out = run_cmd(["tar", "--acls", "-cpf", output_tar, source_dir])
 
     # 
-    # Add one to elapsed time to avoid any change of divide by zero and
+    # Add one to elapsed time to avoid any chance of divide by zero and
     # discard the sub-second part of the elapsed time
     # (eg. "0:00:08.839987" -> 0:00:08)
     #
@@ -835,6 +905,10 @@ def main(device):
               (backup_size, elapsed_time_str,
                round(float(backup_size) / elapsed_time)))
 
+    # Switch back to root
+    os.seteuid(0)
+    os.setegid(0)
+
     #
     # Unmount the disk
     #
@@ -842,28 +916,29 @@ def main(device):
     if rc != 0:
         error("ERROR: failed to unmount disk: %d\n%s\n" % (rc, err))
 
-    #
-    # Remove the device using the appropriate helper script, depending on
-    # whether it's USB or eSATA:
-    #
-    if esata_disk:
-        remove_cmd = os.path.join(script_dir, "enbackup-sata-remove.sh")
-    else:
-        remove_cmd = os.path.join(script_dir, "enbackup-suspend-usb-device.sh")
+    if not is_nfs:
+        #
+        # Remove the device using the appropriate helper script, depending on
+        # whether it's USB or eSATA:
+        #
+        if esata_disk:
+            remove_cmd = os.path.join(script_dir, "enbackup-sata-remove.sh")
+        else:
+            remove_cmd = os.path.join(script_dir, "enbackup-suspend-usb-device.sh")
 
-    m = re.match(r"(sd[a-z])[0-9]", dev)
-    if m == None:
-        error("ERROR: failed to extract base device name from {0}".
-              format(dev))
+        m = re.match(r"(sd[a-z])[0-9]", dev)
+        if m == None:
+            error("ERROR: failed to extract base device name from {0}".
+                  format(dev))
 
-    basedev = m.group(1)
-    remove_dev = "/dev/{0}".format(basedev)
+        basedev = m.group(1)
+        remove_dev = "/dev/{0}".format(basedev)
 
-    rc, err, out = run_cmd([remove_cmd, remove_dev])
+        rc, err, out = run_cmd([remove_cmd, remove_dev])
 
-    if rc != 0:
-        error("ERROR: failed to remove device {0}: {1}\n{2}\n".format(
-              remove_dev, rc, err))
+        if rc != 0:
+            error("ERROR: failed to remove device {0}: {1}\n{2}\n".format(
+                remove_dev, rc, err))
 
     debug("Successfully completed!!")
     operation_success = True
@@ -882,6 +957,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run an external backup")
     parser.add_argument("--device", action="store",
                         help="Specify the external device to back up to.")
+    parser.add_argument("--nfs", action="store_true",
+                        help="Device is an NFS path.")
+    parser.add_argument("--tar", action="store_true",
+                        help="Store archive as a tar file.")
     args = parser.parse_args(sys.argv[1:])
 
     #
@@ -937,7 +1016,7 @@ if __name__ == "__main__":
             #
             sleep_until_between_times(start_at, [23,59])
 
-            main(args.device)
+            main(args.device, args.nfs, args.tar)
         except:
             #
             # Want to catch exceptions and print outputs, but not cause it to
@@ -945,6 +1024,11 @@ if __name__ == "__main__":
             #
             debug("Exception caught - cleaning up")
             debug("".join(traceback.format_exc()))
+
+            # Switch back to root, in case we failed in main() before getting
+            # a chance to do so.
+            os.seteuid(0)
+            os.setegid(0)
         else:
             operation_success = True
 
@@ -978,6 +1062,7 @@ if __name__ == "__main__":
 
             subject = "{0}: Backup archiving to external disk complete".format(
                       prefix)
+
             tmpfile = open("/tmp/enbackup-archive.child", "w")
             tmpfile.write(body)
             for line in open(log_file_name).readlines():
