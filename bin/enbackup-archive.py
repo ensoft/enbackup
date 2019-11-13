@@ -677,6 +677,11 @@ def device_is_usb(devname):
     return is_usb
 
 
+def switch_user(new_gid, new_uid):
+    os.setegid(new_gid)
+    os.seteuid(new_uid)
+
+
 def main(device, is_nfs, is_tar):
     #
     # This script can hammer our servers at a time when people notice.
@@ -750,11 +755,16 @@ def main(device, is_nfs, is_tar):
                                                                    err))
 
     # Drop down to the enbackup user's uid/gid, while writing files.
+    # Switch to Enbackup's home directory, so that subprocesses (e.g. 'find')
+    # don't hit errors if they try to switch back to root's home dir
+    # after this point.
     new_user = enbackup.utils.get_username()
     new_uid = pwd.getpwnam(new_user).pw_uid
     new_gid = pwd.getpwnam(new_user).pw_gid
-    os.setegid(new_gid)
-    os.seteuid(new_uid)
+    switch_user(new_gid, new_uid)
+    new_home_dir = os.path.expanduser("~{}".format(new_user))
+    debug("Switching cwd to {}".format(new_home_dir))
+    os.chdir(new_home_dir)
 
     #
     # Need to know the size of the backup directory
@@ -906,8 +916,7 @@ def main(device, is_nfs, is_tar):
                round(float(backup_size) / elapsed_time)))
 
     # Switch back to root
-    os.seteuid(0)
-    os.setegid(0)
+    switch_user(0, 0)
 
     #
     # Unmount the disk
@@ -1027,8 +1036,7 @@ if __name__ == "__main__":
 
             # Switch back to root, in case we failed in main() before getting
             # a chance to do so.
-            os.seteuid(0)
-            os.setegid(0)
+            switch_user(0, 0)
         else:
             operation_success = True
 
