@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#! /usr/bin/python
 ###############################################################################
 # enbackup-archive.py - worker script to store backups on external disks
 #
@@ -123,7 +123,7 @@ config_dir = "/etc/enbackup.d/"
 # Minimum number of "keep" backup sets we need, before we delete
 # "keep_optional" ones
 #
-minimum_backup_sets_required = 1
+minimum_backup_sets_required = 0
 
 
 #
@@ -813,9 +813,23 @@ def main(device, is_nfs, is_tar):
             backup_old = os.path.join(backup_dir_full, backup)
             backup_new = os.path.join(mirror_dir_full, backup)
             if old_backup_is_tar:
-                rc, err, out = run_cmd(["tar", "-f", backup_old,
+                # Run the deletion on a local copy of the file,
+                # since accessing the tar directly is slow when it
+                # is mounted over the network.
+                local_copy = os.path.join("/tmp", backup)
+                rc, err, out = run_cmd(["cp", "-a", backup_old,
+                                        local_copy])
+                if rc != 0:
+                    error("ERROR: failed to copy old backup: {}\n{}".format(rc, err))
+
+                rc, err, out = run_cmd(["tar", "-f", local_copy,
                                         "--delete", "--wildcards",
                                         "*/rdiff-backup-data"])
+                if rc != 0:
+                    error("ERROR: failed to modify local copy: {}\n{}".format(rc, err))
+
+                remove_old_backup(backup_old)
+                rc, err, out = run_cmd(["mv", local_copy, backup_old])
             else:
                 rc, err, out = run_cmd([rdiff_to_mirror_cmd, backup_old])
 
