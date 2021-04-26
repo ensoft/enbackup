@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#!/usr/bin/python
 ###############################################################################
 # enbackup-archive.py - worker script to store backups on external disks
 #
@@ -302,7 +302,8 @@ def date_to_ages(date, basedate, max_dates):
     # this).
     #
     if basedate.toordinal() < date.toordinal():
-        raise "Invalid basedate - must be more recent than all backup dates"
+        raise Exception("Invalid basedate - "
+                        "must be more recent than all backup dates")
     age_days = basedate.toordinal() - date.toordinal()
     if age_days > max_dates["age_days"]:
         max_dates["age_days"] = age_days
@@ -695,7 +696,7 @@ def main(device, is_nfs, is_tar):
     # passed in env variable
     #
     if device is None:
-        if not os.environ.has_key("DEVPATH"):
+        if "DEVPATH" not in os.environ:
             debug(" argv: %s" % (sys.argv))
             debug(" environ:")
             for item in os.environ:
@@ -973,8 +974,8 @@ if __name__ == "__main__":
     # manually, as udev will always be run as root.
     #
     if (os.geteuid() != 0):
-        print("ERROR: enbackup-archive.py must be run as root - aborting.  "
-              "(EUID %s)" % (os.geteuid()))
+        print(("ERROR: enbackup-archive.py must be run as root - aborting.  "
+              "(EUID %s)" % (os.geteuid())))
         sys.exit(-1)
 
     parser = argparse.ArgumentParser(description="Run an external backup")
@@ -1011,9 +1012,9 @@ if __name__ == "__main__":
                                                  start_at_fmt)
         start_at = [start_at_ts.hour, start_at_ts.minute]
     except:
-        print("ERROR: start time is not in expected format, "
+        print(("ERROR: start time is not in expected format, "
               "expect {1}, given {0} - aborting".format(start_at_fmt,
-                                                        start_at_string))
+                                                        start_at_string)))
         sys.exit(-1)
 
     #
@@ -1094,8 +1095,8 @@ if __name__ == "__main__":
             retval = os.popen('mail -s "%s" %s < %s' %
                               (subject, logfile_email_to, tmpfile.name)).close()
             if retval:
-                print("Failed to email results to (%s): %d\n" %
-                         (logfile_email_to, retval))
+                print(("Failed to email results to (%s): %d\n" %
+                         (logfile_email_to, retval)))
     else:
         #
         # Send a mail from the parent process just to say that the backup has
@@ -1114,5 +1115,5 @@ if __name__ == "__main__":
         retval = os.popen('mail -s "%s" %s < %s' %
                           (subject, logfile_email_to, tmpfile.name)).close()
         if retval:
-            print("Failed to email results to (%s): %d\n" %
-                     (logfile_email_to, retval))
+            print(("Failed to email results to (%s): %d\n" %
+                     (logfile_email_to, retval)))

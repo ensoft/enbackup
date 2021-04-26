@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # EnBackup setup file
 #
@@ -6,7 +6,7 @@
 from distutils.core import setup
 
 setup(name='enbackup',
-      version="1.4.18",
+      version="1.5",
       description='EnBackup: backup tools based on rdiff-backup',
       packages=['enbackup', 'enbackup.cmd'],
       package_dir={'': 'src'},

@@ -2,11 +2,11 @@ Source: enbackup
 Maintainer: Jim M <jimm@ensoft.co.uk>
 Section: misc
 Priority: optional
-Build-Depends: debhelper,python
+Build-Depends: debhelper,python3
 Standards-Version: 3.9.1
 
 Package: enbackup
 Architecture: all
-Depends: python,lsscsi,rdiff-backup,mailutils,sdparm,${misc:Depends}
+Depends: python3,lsscsi,rdiff-backup,mailutils,sdparm,${misc:Depends}
 Description: Ensoft backup package
  This package contains all Ensoft backup tools

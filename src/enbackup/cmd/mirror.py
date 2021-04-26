@@ -21,7 +21,7 @@
 import os
 import re
 import sys
-import ConfigParser
+import configparser
 import optparse
 import datetime
 import enbackup.log
@@ -214,7 +214,7 @@ def mirror_local(src, tgt_dir):
         try:
             src_server = config.get(src, "src_server")
             src_dir    = config.get(src, "src_dir")
-        except ConfigParser.NoSectionError:
+        except configparser.NoSectionError:
             logger.log("No source entry found in %s matching keyword '%s'" %
                        (cfg_file_path, src))
             raise

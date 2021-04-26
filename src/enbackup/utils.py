@@ -18,7 +18,7 @@ import string
 import time
 import subprocess
 import pwd
-import ConfigParser
+import configparser
 
 #
 # Global configuration:
@@ -83,7 +83,7 @@ def makedirs(path, logger, change_ownership):
         makedirs(parentdir, logger, change_ownership)
         if logger != None:
             logger.log("Creating {}".format(normalized))
-        os.mkdir(normalized, 0755)
+        os.mkdir(normalized, 0o755)
         #
         # Change ownership if requested (this does nothing if not running
         # as root).
@@ -260,7 +260,7 @@ class StringFilter(object):
 ###############################################################################
 
 
-class DefaultConfigParser(ConfigParser.ConfigParser):
+class DefaultConfigParser(configparser.ConfigParser):
     """
     Extends ConfigParser to add support for default options under sections.
 
@@ -275,7 +275,7 @@ class DefaultConfigParser(ConfigParser.ConfigParser):
             section.
         """
         self.defaults = defaults
-        ConfigParser.ConfigParser.__init__(self)
+        configparser.ConfigParser.__init__(self)
 
     def get(self, section, option):
         # Try fetching the value using the superclass method, but if we
@@ -283,8 +283,9 @@ class DefaultConfigParser(ConfigParser.ConfigParser):
         # the default values.  (If the value isn't in the defaults, re-raise
         # the exception.)
         try:
-            return ConfigParser.ConfigParser.get(self, section, option)
-        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError) as e:
+            return configparser.ConfigParser.get(self, section, option,
+                                                 raw=True)
+        except (configparser.NoSectionError, configparser.NoOptionError) as e:
             if section in self.defaults and option in self.defaults[section]:
                 return self.defaults[section][option]
             else:

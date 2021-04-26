@@ -285,24 +285,24 @@ def archive_summary(debug_stmts):
             else:
                 waiting_for_lock = "No"
 
-            print("Archiving is currently in progress:\n"
+            print(("Archiving is currently in progress:\n"
                   "  Job started at: {}\n"
                   "    (elapsed time: {})\n"
                   "  Waiting for lock: {}\n".format(
                             last_start_stmt.ts.strftime(TS_FORMAT),
                             elapsed(last_start_stmt.ts,
                                     datetime.datetime.now()),
-                            waiting_for_lock))
+                            waiting_for_lock)))
         else:
-            print("WARNING: Last archive operation (pid {}, started at {}) "
+            print(("WARNING: Last archive operation (pid {}, started at {}) "
                   "did not exit successfully. Check {} for debugging "
                   "information".format(last_start_stmt.pid,
                                        last_start_stmt.ts.strftime(TS_FORMAT),
-                                       DEBUG_LOG))
+                                       DEBUG_LOG)))
     else:
         print("Archiving is not currently in progress\n")
 
-    print("Last completed archiving job:\n"
+    print(("Last completed archiving job:\n"
           "  Overall status: {}\n"
           "  Started at:  {}\n"
           "  Finished at: {}\n"
@@ -310,7 +310,7 @@ def archive_summary(debug_stmts):
                 last_op_status,
                 last_completed_start_stmt.ts.strftime(TS_FORMAT),
                 last_end_stmt.ts.strftime(TS_FORMAT),
-                elapsed(last_completed_start_stmt.ts, last_end_stmt.ts)))
+                elapsed(last_completed_start_stmt.ts, last_end_stmt.ts))))
 
 
 def get_matching_pids(pattern):
@@ -524,7 +524,7 @@ def in_progress_status(debug_stmts):
     running_ops = []
     finishing_ops = []
 
-    for pid, op in ops.iteritems():
+    for pid, op in ops.items():
         if op.state == OpState.START:
             starting_ops.append(pid)
             running_ops.append(pid)
@@ -537,13 +537,13 @@ def in_progress_status(debug_stmts):
             running_ops.append(pid)
 
     def _print_op(pid, op_descr, state_descr):
-        print("  {}: {}{}".format(pid, ops[pid].descr, extra))
+        print(("  {}: {}{}".format(pid, ops[pid].descr, extra)))
         indent_len = len(str(pid))
         indent = "".join([" " for i in range(0, indent_len)])
-        print("  {}  {} for {}".format(
+        print(("  {}  {} for {}".format(
                 indent,
                 state_descr,
-                elapsed(ops[pid].ts, datetime.datetime.now())))
+                elapsed(ops[pid].ts, datetime.datetime.now()))))
 
     print("The following jobs are currently running:")
     for pid in running_ops:
@@ -617,7 +617,7 @@ def print_backup_sets(debug_stmts):
     backup_sets = get_backup_sets(debug_stmts)
     print("Found the following backup sets:")
     for s in backup_sets:
-        print("  {}".format(s))
+        print(("  {}".format(s)))
 
 
 def status_of_single_set(debug_stmts, backup_set):
@@ -659,7 +659,7 @@ def status_of_single_set(debug_stmts, backup_set):
         raise DebugNotFoundError(debug_stmts,
                                  "backup set {}".format(backup_set))
 
-    print("Last result for backing up '{}': {}\n"
+    print(("Last result for backing up '{}': {}\n"
           "  Backup started at:  {}\n"
           "  Backup finished at: {}\n"
           "    (elapsed time: {})\n".format(
@@ -667,7 +667,7 @@ def status_of_single_set(debug_stmts, backup_set):
             last_status,
             stmt.ts.strftime(TS_FORMAT),
             last_status_msg.ts.strftime(TS_FORMAT),
-            elapsed(stmt.ts, last_status_msg.ts)))
+            elapsed(stmt.ts, last_status_msg.ts))))
 
 
 def main(arguments):
@@ -725,15 +725,15 @@ def main(arguments):
                 status_of_single_set(debug_stmts, args.backup_set)
 
     except UserVisibleError as e:
-        print(e.user_msg)
+        print((e.user_msg))
 
     except DebugNotFoundError as e:
-        print("No information about {} found in recent logs (oldest "
+        print(("No information about {} found in recent logs (oldest "
                 "date searched was {}). You may need to try the "
                 "--search-full-history option. {}".format(
                     e.searched_event,
                     e.oldest_ts.strftime(TS_FORMAT),
-                    e.extra_info))
+                    e.extra_info)))
 
 
 if __name__ == "__main__":

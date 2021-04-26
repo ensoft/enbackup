@@ -46,7 +46,7 @@ def notify_test(args):
     logger.debug("Start test, about to sleep...")
     time.sleep(float(args[0]))
     logger.debug("End test")
-    print "Finished test!"
+    print("Finished test!")
 
 
 #

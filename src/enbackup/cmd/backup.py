@@ -556,7 +556,7 @@ def calculate_totals(stats):
 
     byte_to_str = rdiff_backup.statistics.StatsObj().get_byte_summary_string
 
-    for backup_set in stats.keys():
+    for backup_set in list(stats.keys()):
         num_time          += float(stats[backup_set]["time"][0])
         num_src_count     += int(stats[backup_set]["src_count"][0])
         num_src_size      += int(stats[backup_set]["src_size"][0])
@@ -773,7 +773,7 @@ def backup_main(rdiff_options, report_incremental_stats, starttime):
     # already validates the time for the log file).
     #
     if os.path.exists(reference_file_name_full):
-        old_stats = pickle.load(open(reference_file_name_full))
+        old_stats = pickle.load(open(reference_file_name_full, 'rb'))
     else:
         log_string("ERROR: no reference stats to compare.  "
                    "This is unexpected unless this is a new backup.  "
@@ -786,9 +786,9 @@ def backup_main(rdiff_options, report_incremental_stats, starttime):
     # reference file with the nightly stats.
     #
     new_stats_filename = os.path.join(log_output_dir, starttime + ".stats")
-    pickle.dump(new_stats, open(new_stats_filename, "w"))
+    pickle.dump(new_stats, open(new_stats_filename, "wb"))
     if report_incremental_stats or not os.path.exists(reference_file_name_full):
-        pickle.dump(new_stats, open(reference_file_name_full, "w"))
+        pickle.dump(new_stats, open(reference_file_name_full, "wb"))
 
     #
     # If we have reference stats then compare the values..
@@ -804,12 +804,12 @@ def backup_main(rdiff_options, report_incremental_stats, starttime):
     # Sort the keys so the order looks good, and make sure TOTAL is at the
     # beginning
     #
-    keys = old_stats.keys()
+    keys = list(old_stats.keys())
     keys.sort()
     keys.remove("TOTAL")
     keys.insert(0, "TOTAL")
     for backup_set in keys:
-        if not new_stats.has_key(backup_set):
+        if backup_set not in new_stats:
             error_count_batch += 1
             log_string("ERROR: Backup set '%s' in reference does not exist in "
                        "latest backup" % (backup_set))
@@ -818,10 +818,10 @@ def backup_main(rdiff_options, report_incremental_stats, starttime):
                 get_stats_string(backup_set,
                                  new_stats[backup_set], old_stats[backup_set]))
 
-    keys = new_stats.keys()
+    keys = list(new_stats.keys())
     keys.sort()
     for backup_set in keys:
-        if not old_stats.has_key(backup_set):
+        if backup_set not in old_stats:
             if len(old_stats) > 0:
                 error_count_batch += 1
                 log_string("ERROR: Backup set '%s' in new backup does not "
@@ -940,7 +940,7 @@ def openlog_local(timestamp):
     logname = os.path.join(log_output_dir, "%s.log" % (timestamp))
 
     if os.path.exists(logname):
-        print("ERROR: File '%s' already exists - exiting." % (logname))
+        print(("ERROR: File '%s' already exists - exiting." % (logname)))
         sys.exit(-1)
 
     logfile = open(logname, "w")
@@ -1009,8 +1009,8 @@ def do_local(parser, parser_options, parser_args):
     # manually, or someone has setup cron job wrongly.
     #
     if (os.geteuid() != 0):
-        print("ERROR: backup command must be run as root - aborting.  "
-              "(EUID %s)" % (os.geteuid()))
+        print(("ERROR: backup command must be run as root - aborting.  "
+              "(EUID %s)" % (os.geteuid())))
         sys.exit(-1)
 
     #
@@ -1180,7 +1180,7 @@ def do_local(parser, parser_options, parser_args):
     
             if not error_hit:
                 if os.path.exists(split_parent):
-                    child_dirs = os.walk(split_parent).next()[1]
+                    child_dirs = next(os.walk(split_parent))[1]
                     for child_dir in child_dirs:
                         if not child_dir in split_parent_exclude:
                             child_dir_abs = os.path.join(split_parent, child_dir)
@@ -1326,9 +1326,9 @@ def do_local(parser, parser_options, parser_args):
             tmp_filename = os.path.join(backup_output_dir, ".enbackup.tmp")
             open(tmp_filename, "w").write("temporary file - delete me\n")
             if os.stat(tmp_filename).st_uid != 0:
-                print("ERROR: enbackup.py must be able to write output files as "
+                print(("ERROR: enbackup.py must be able to write output files as "
                       "root - aborting.  (EUID %s)" %
-                      (os.stat(tmp_filename).st_uid))
+                      (os.stat(tmp_filename).st_uid)))
                 sys.exit(-1)
     
             if os.path.exists(tmp_filename):

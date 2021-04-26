@@ -74,7 +74,7 @@ def do_copy(backup_set, target_dir_parent):
     # location, in the target area.
     os.makedirs(target_dir_parent, mode=0o700)
 
-    print("Copying {} to {}".format(backup_set, target_dir_parent))
+    print(("Copying {} to {}".format(backup_set, target_dir_parent)))
     run_cmd(["cp", "-a", backup_set, target_dir_parent], measure=True)
 
 
@@ -135,7 +135,7 @@ def restore_mdata_files(target_dir, data_dir, check_only=True):
 
     print("Going to keep these metadata files:")
     for f in to_keep:
-        print("  {}".format(f))
+        print(("  {}".format(f)))
 
     if check_only:
         print(" *** DEBUG ONLY, NOT ACTUALLY RESTORING ***")
@@ -160,7 +160,7 @@ def lock_source_dir(source_dir):
     # sure no other enbackup jobs change it while we're running.
     locks = []
     while source_dir != '/':
-        print("Locking directory {}".format(source_dir))
+        print(("Locking directory {}".format(source_dir)))
         lock_details = "enbackup-trim-old-data, PID {}\n".format(os.getpid())
         lock = enbackup.utils.DirLock(lock_details,
                                       source_dir)

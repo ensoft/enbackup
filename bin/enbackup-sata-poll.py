@@ -79,7 +79,7 @@ def run_command(cmd):
     a = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     a.wait()
     if a.returncode != 0:
-        print("ERROR: command '%s' returned %u" % (cmd_str, a.returncode))
+        print(("ERROR: command '%s' returned %u" % (cmd_str, a.returncode)))
     return "".join(a.stdout.readlines())
 
 
@@ -101,8 +101,8 @@ def output_device_list(poll_devices, output_prefix=""):
     index = 0
     for device in poll_devices:
         index += 1
-        print("%s  %u: %s" %
-              (output_prefix, index, model_to_devicename(device)))
+        print(("%s  %u: %s" %
+              (output_prefix, index, model_to_devicename(device))))
 
 
 if __name__ == "__main__":
@@ -116,8 +116,8 @@ if __name__ == "__main__":
 
     debug_enabled = options.debug
     if len(args) != 0:
-        print("Invalid arguments specified (expect only optional mode): %s" %
-              (args))
+        print(("Invalid arguments specified (expect only optional mode): %s" %
+              (args)))
         sys.exit(-1)
 
     #
@@ -127,11 +127,11 @@ if __name__ == "__main__":
     #
     devices = scsiadd_poll()
 
-    print("%u devices currently attached:" % (len(devices)))
+    print(("%u devices currently attached:" % (len(devices))))
     output_device_list(devices)
 
     if devicename_sata in devices:
-        print "NOTE: eSATA device is attached"
+        print("NOTE: eSATA device is attached")
     else:
-        print "NOTE: No known eSATA devices attached"
+        print("NOTE: No known eSATA devices attached")
 

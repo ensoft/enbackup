@@ -1,3 +1,10 @@
+enbackup (1.5ubuntu1) UNRELEASED; urgency=medium
+
+  * Python 3 migration.
+  * Debian package updates.
+
+ -- Jim Mizutani <jmizutan@ensoft-linux4.cisco.com>  Fri, 23 Apr 2021 15:03:58 +0100
+
 enbackup (1.4.18) bionic; urgency=medium
 
   * NFS mount and tar file support for enbackup-archive.py
