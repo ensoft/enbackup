@@ -1,9 +1,11 @@
-enbackup (1.5ubuntu1) UNRELEASED; urgency=medium
+enbackup (1.5ubuntu2) UNRELEASED; urgency=medium
 
   * Python 3 migration.
   * Debian package updates.
+  * Fix use of .next() attribute in generator, and DefaultConfigParser fallback
+    handling.
 
- -- Jim Mizutani <jmizutan@ensoft-linux4.cisco.com>  Fri, 23 Apr 2021 15:03:58 +0100
+ -- Jim Mizutani <jmizutan@ensoft-linux4.cisco.com>  Mon, 26 Apr 2021 12:16:40 +0100
 
 enbackup (1.4.18) bionic; urgency=medium
 
